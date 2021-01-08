@@ -1,15 +1,14 @@
 use std::alloc::{handle_alloc_error, Allocator, Global, Layout};
 use std::marker::PhantomData;
-use std::mem;
 use std::ptr;
 
-struct LinkedList<T> {
+pub struct LinkedList<T> {
     head: *const Node<T>,
     len: usize,
     _marker: PhantomData<T>,
 }
 
-impl<T> LinkedList<T> {
+impl<'a, T> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             head: std::ptr::null() as *const Node<T>,
@@ -53,7 +52,7 @@ impl<T> LinkedList<T> {
                 self.head = ptr.as_ptr() as *mut Node<T>;
             } else {
                 let mut dest_node = self.head as *mut Node<T>;
-                while (*dest_node).next != 0 as *mut Node<T> {
+                while (*dest_node).next != std::ptr::null_mut::<Node<T>>() {
                     dest_node = (*dest_node).next;
                 }
 
@@ -62,6 +61,35 @@ impl<T> LinkedList<T> {
         }
 
         self.len += 1;
+    }
+
+    pub fn iter(&self) -> Iter<'a, T> {
+        Iter {
+            current: self.head,
+            _marker: PhantomData,
+        }
+    }
+}
+
+pub struct Iter<'a, T> {
+    current: *const Node<T>,
+    _marker: PhantomData<&'a T>,
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<&'a T> {
+        if self.current == std::ptr::null() {
+            return None;
+        }
+
+        // SAFETY: self.current is not null since we just checked it
+        unsafe {
+            let value = &((*self.current).value) as *const T;
+            self.current = (*self.current).next;
+            Some(&*value)
+        }
     }
 }
 
@@ -89,5 +117,18 @@ mod tests {
 
         assert_eq!(linked_list.len(), 3);
         assert_eq!(linked_list.front(), Some(&5));
+    }
+
+    #[test]
+    pub fn linked_list_iter() {
+        let mut linked_list: LinkedList<i32> = LinkedList::new();
+        linked_list.push(5);
+        linked_list.push(12);
+        linked_list.push(23);
+
+        let mut iter = linked_list.iter();
+        assert_eq!(iter.next(), Some(&5));
+        assert_eq!(iter.next(), Some(&12));
+        assert_eq!(iter.next(), Some(&23));
     }
 }
