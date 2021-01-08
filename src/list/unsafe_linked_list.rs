@@ -86,7 +86,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
 
         // SAFETY: self.current is not null since we just checked it
         unsafe {
-            let value = &((*self.current).value) as *const T;
+            let value = &(*self.current).value as *const T;
             self.current = (*self.current).next;
             Some(&*value)
         }
