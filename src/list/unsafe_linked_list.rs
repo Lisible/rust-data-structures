@@ -12,7 +12,7 @@ struct LinkedList<T> {
 impl<T> LinkedList<T> {
     pub fn new() -> Self {
         Self {
-            head: mem::align_of::<Node<T>>() as *const Node<T>,
+            head: std::ptr::null() as *const Node<T>,
             len: 0,
             _marker: PhantomData,
         }
@@ -41,7 +41,7 @@ impl<T> LinkedList<T> {
         let ptr = ptr.unwrap();
         let new_node = Node {
             value,
-            next: mem::align_of::<Node<T>>() as *mut Node<T>,
+            next: std::ptr::null::<*mut Node<T>>() as *mut Node<T>,
         };
 
         // SAFETY: ptr is guaranteed to be not null, so we can write to it
@@ -53,7 +53,7 @@ impl<T> LinkedList<T> {
                 self.head = ptr.as_ptr() as *mut Node<T>;
             } else {
                 let mut dest_node = self.head as *mut Node<T>;
-                while (*dest_node).next != mem::align_of::<Node<T>>() as *mut Node<T> {
+                while (*dest_node).next != 0 as *mut Node<T> {
                     dest_node = (*dest_node).next;
                 }
 
