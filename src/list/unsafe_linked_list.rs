@@ -3,13 +3,13 @@ use std::marker::PhantomData;
 use std::ptr;
 use std::ptr::NonNull;
 
-pub struct LinkedList<T: Clone> {
+pub struct LinkedList<T> {
     head: *mut Node<T>,
     len: usize,
     _marker: PhantomData<T>,
 }
 
-impl<'a, T: Clone> LinkedList<T> {
+impl<'a, T> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             head: std::ptr::null::<Node<T>>() as *mut _,
@@ -70,12 +70,10 @@ impl<'a, T: Clone> LinkedList<T> {
             if self.len == 0 {
                 return None;
             } else if self.len == 1 {
-                let result = Some((*self.head).value.clone());
+                let result = *Box::from_raw(self.head);
                 self.len = 0;
-                let c: NonNull<Node<T>> = (&*self.head).into();
-                Global.deallocate(c.cast(), Layout::new::<Node<T>>());
 
-                return result;
+                return Some(result.value);
             }
 
             let mut prev = self.head;
@@ -89,13 +87,11 @@ impl<'a, T: Clone> LinkedList<T> {
                 current = (*current).next;
             }
 
+            let current = *Box::from_raw(current);
             (*prev).next = std::ptr::null_mut();
-            let result = Some((*current).value.clone());
             self.len -= 1;
 
-            let c: NonNull<Node<T>> = (&*current).into();
-            Global.deallocate(c.cast(), Layout::new::<Node<T>>());
-            result
+            Some(current.value)
         }
     }
 
@@ -107,7 +103,7 @@ impl<'a, T: Clone> LinkedList<T> {
     }
 }
 
-impl<T: Clone> Drop for LinkedList<T> {
+impl<T> Drop for LinkedList<T> {
     fn drop(&mut self) {
         while self.len > 0 {
             self.pop();
