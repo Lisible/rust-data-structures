@@ -1,9 +1,11 @@
+use std::marker::PhantomData;
 use std::ptr::NonNull;
 
 pub struct LinkedList<T> {
     head: Option<NonNull<Node<T>>>,
     tail: Option<NonNull<Node<T>>>,
     len: usize,
+    _marker: PhantomData<Node<T>>,
 }
 
 struct Node<T> {
@@ -18,6 +20,7 @@ impl<T> LinkedList<T> {
             head: None,
             tail: None,
             len: 0,
+            _marker: PhantomData,
         }
     }
 
