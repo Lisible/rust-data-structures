@@ -1,7 +1,6 @@
 use std::alloc::{handle_alloc_error, Allocator, Global, Layout};
 use std::marker::PhantomData;
 use std::ptr;
-use std::ptr::NonNull;
 
 pub struct LinkedList<T> {
     head: *mut Node<T>,

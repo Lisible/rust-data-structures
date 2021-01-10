@@ -1,2 +1,2 @@
-mod doubly_linked_list;
-mod unsafe_linked_list;
+pub mod doubly_linked_list;
+pub mod unsafe_linked_list;

@@ -15,17 +15,17 @@ pub struct Vec<T> {
 }
 
 impl<T> Vec<T> {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Vec {
             buf: RawVec::new(),
             len: 0,
         }
     }
 
-    fn ptr(&self) -> *mut T {
+    pub fn ptr(&self) -> *mut T {
         self.buf.ptr.as_ptr()
     }
-    fn cap(&self) -> usize {
+    pub fn cap(&self) -> usize {
         self.buf.cap
     }
 
